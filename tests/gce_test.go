@@ -85,3 +85,32 @@ func TestGCEInstanceWithAdvancedFeatures(t *testing.T) {
 	assert.True(t, instance.ShieldedInstanceConfig.EnableIntegrityMonitoring)
 	assert.True(t, instance.ConfidentialInstanceConfig.EnableConfidentialCompute)
 }
+
+func TestConfidentialVMValidation(t *testing.T) {
+	t.Parallel()
+
+	terraformOptions := &terraform.Options{
+		TerraformDir: "../examples/advanced",
+		Vars: map[string]interface{}{
+			"instance_name":          "test-confidential-vm",
+			"enable_confidential_vm": true,
+			"machine_type":           "n1-standard-1", // Invalid machine type
+		},
+	}
+
+	// Run Terraform plan and expect it to fail due to validation error
+	_, err := terraform.PlanE(t, terraformOptions)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "Confidential VMs are only supported with machine types starting with 'n2d', 'n2', or 'e2'.")
+
+	// Change to a valid machine type
+	terraformOptions.Vars["machine_type"] = "n2-standard-4"
+	terraform.InitAndApply(t, terraformOptions)
+
+	// Cleanup
+	defer terraform.Destroy(t, terraformOptions)
+
+	// Verify the instance was created successfully
+	vmName := terraform.Output(t, terraformOptions, "vm_name")
+	assert.Equal(t, "test-confidential-vm", vmName)
+}
