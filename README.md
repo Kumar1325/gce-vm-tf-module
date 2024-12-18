@@ -60,7 +60,7 @@ Attempting to use other machine types will result in a validation error during `
 |--------------------|---------------------------------------------------|
 | `vm_name`          | The name of the created VM instance               |
 | `vm_self_link`     | The self-link of the created VM instance          |
-| `vm_external_ip`   | The external IP address of the VM (if applicable) |
+| `vm_internal_ip`   | The internal IP address of the VM |
 
 ---
 
