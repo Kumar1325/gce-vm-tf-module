@@ -8,6 +8,38 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestGCEInstance(t *testing.T) {
+	t.Parallel()
+
+	// Define Terraform options
+	terraformOptions := &terraform.Options{
+		TerraformDir: "../examples/simple", // Path to example
+		Vars: map[string]interface{}{
+			"instance_name": "test-instance",
+			"machine_type":  "e2-micro",
+			"zone":          "us-central1-a",
+			"image":         "debian-cloud/debian-11",
+		},
+	}
+
+	// Ensure resources are destroyed at the end of the test
+	defer terraform.Destroy(t, terraformOptions)
+
+	// Run `terraform init` and `terraform apply`
+	terraform.InitAndApply(t, terraformOptions)
+
+	// Get output values
+	vmName := terraform.Output(t, terraformOptions, "vm_name")
+	vmIP := terraform.Output(t, terraformOptions, "vm_internal_ip")
+
+	// Verify VM exists in GCP
+	computeClient := gcp.NewComputeClient(t)
+	instance := gcp.GetInstance(t, computeClient, "my-gcp-project", "us-central1-a", vmName)
+
+	assert.Equal(t, vmName, instance.Name)
+	assert.NotNil(t, vmIP)
+	assert.NotEmpty(t, instance.NetworkInterfaces)
+}
 func TestGCEInstanceWithAdvancedFeatures(t *testing.T) {
 	t.Parallel()
 
