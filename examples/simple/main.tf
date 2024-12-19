@@ -9,6 +9,7 @@ module "gce_vm" {
   image            = "debian-cloud/debian-11"
   network          = "default"
   subnetwork       = "default"
+  cmek_key_name    = "projects/my-project/locations/global/keyRings/my-keyring/cryptoKeys/my-key"
   tags             = ["example", "web"]
   metadata = {
     startup-script = "echo Hello, Terraform!"
