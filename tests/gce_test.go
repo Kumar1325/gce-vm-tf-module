@@ -114,3 +114,27 @@ func TestConfidentialVMValidation(t *testing.T) {
 	vmName := terraform.Output(t, terraformOptions, "vm_name")
 	assert.Equal(t, "test-confidential-vm", vmName)
 }
+
+func TestGCEInstanceWithCMEK(t *testing.T) {
+	t.Parallel()
+
+	terraformOptions := &terraform.Options{
+		TerraformDir: "../examples/advanced",
+		Vars: map[string]interface{}{
+			"instance_name":          "test-advanced-vm",
+			"enable_confidential_vm": true,
+			"machine_type":           "n2-standard-4",
+			"cmek_key_name":          "projects/my-project/locations/global/keyRings/my-keyring/cryptoKeys/my-key",
+		},
+	}
+
+	// Ensure resources are cleaned up after test
+	defer terraform.Destroy(t, terraformOptions)
+
+	// Run Terraform init and apply
+	terraform.InitAndApply(t, terraformOptions)
+
+	// Validate outputs
+	vmName := terraform.Output(t, terraformOptions, "vm_name")
+	assert.Equal(t, "test-advanced-vm", vmName)
+}
