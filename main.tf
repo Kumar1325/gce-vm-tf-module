@@ -9,6 +9,7 @@ resource "google_compute_instance" "vm" {
     initialize_params {
       image = var.image
     }
+    kms_key_self_link = var.cmek_key_name
   }
 
   # Network interface with optional IAP tunneling
