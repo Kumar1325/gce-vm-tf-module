@@ -56,6 +56,11 @@ variable "subnetwork" {
   type        = string
 }
 
+variable "cmek_key_name" {
+  description = "The name of the Customer-Managed Encryption Key (CMEK)"
+  type = string
+}
+
 variable "tags" {
   description = "Tags to associate with the instance"
   type        = list(string)
