@@ -1,6 +1,3 @@
-# gce-vm-tf-module
-GCE VM instance Terraform module
-
 # GCE VM Terraform Module
 
 This Terraform module creates Google Compute Engine (GCE) Virtual Machines (VMs) on Google Cloud Platform (GCP) with advanced configurations, including support for:
@@ -9,6 +6,7 @@ This Terraform module creates Google Compute Engine (GCE) Virtual Machines (VMs)
 - Sole Tenancy
 - Confidential VMs
 - Shielded VMs
+- Mandatory encryption with Customer-Managed Encryption Keys (CMEK)
 
 ---
 
@@ -16,6 +14,7 @@ This Terraform module creates Google Compute Engine (GCE) Virtual Machines (VMs)
 
 - Flexible configuration for VM instance creation
 - Support for advanced security and isolation features
+- Mandatory CMEK encryption for VM disks
 - Variable validations to enforce valid configurations
 - Ready-to-use examples for basic and advanced setups
 
@@ -42,6 +41,7 @@ This Terraform module creates Google Compute Engine (GCE) Virtual Machines (VMs)
 | `sole_tenancy_node_groups`         | List of node group names for sole tenancy                    | `list(string)`   | `[]`                       | No           |
 | `tags`                             | List of network tags for the VM                              | `list(string)`   | `[]`                       | No           |
 | `metadata`                         | Metadata key-value pairs to add to the instance              | `map(string)`    | `{}`                       | No           |
+| `cmek_key_name`                    | The name of the Customer-Managed Encryption Key (CMEK)       | `string`         | n/a                        | Yes          |
 
 ### Variable Validation for Confidential VMs
 
@@ -60,7 +60,7 @@ Attempting to use other machine types will result in a validation error during `
 |--------------------|---------------------------------------------------|
 | `vm_name`          | The name of the created VM instance               |
 | `vm_self_link`     | The self-link of the created VM instance          |
-| `vm_internal_ip`   | The internal IP address of the VM |
+| `vm_external_ip`   | The external IP address of the VM (if applicable) |
 
 ---
 
@@ -80,6 +80,7 @@ module "gce_vm" {
   instance_name    = "basic-vm"
   machine_type     = "n1-standard-1"
   image            = "debian-cloud/debian-11"
+  cmek_key_name    = "projects/my-project/locations/global/keyRings/my-keyring/cryptoKeys/my-key"
 }
 ```
 
@@ -97,6 +98,7 @@ module "gce_vm" {
   instance_name    = "advanced-vm"
   machine_type     = "n2-standard-4"
   image            = "debian-cloud/debian-11"
+  cmek_key_name    = "projects/my-project/locations/global/keyRings/my-keyring/cryptoKeys/my-key"
 
   enable_iap                      = true
   enable_confidential_vm          = true
@@ -128,7 +130,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGCEInstanceWithAdvancedFeatures(t *testing.T) {
+func TestGCEInstanceWithCMEK(t *testing.T) {
 	t.Parallel()
 
 	terraformOptions := &terraform.Options{
@@ -137,6 +139,7 @@ func TestGCEInstanceWithAdvancedFeatures(t *testing.T) {
 			"instance_name":          "test-advanced-vm",
 			"enable_confidential_vm": true,
 			"machine_type":           "n2-standard-4",
+			"cmek_key_name":          "projects/my-project/locations/global/keyRings/my-keyring/cryptoKeys/my-key",
 		},
 	}
 
@@ -179,6 +182,7 @@ func TestGCEInstanceWithAdvancedFeatures(t *testing.T) {
 - Validate variable inputs for correctness.
 - Leverage Terratest to automate infrastructure validation.
 - Enable GCP monitoring and logging for Shielded and Confidential VMs.
+- Ensure CMEK keys are properly managed and have sufficient IAM permissions.
 
 ---
 
@@ -186,5 +190,4 @@ func TestGCEInstanceWithAdvancedFeatures(t *testing.T) {
 
 - [Google Cloud Platform: Compute Engine Documentation](https://cloud.google.com/compute/docs)
 - [Terraform: Google Provider Documentation](https://registry.terraform.io/providers/hashicorp/google/latest/docs)
-
 
