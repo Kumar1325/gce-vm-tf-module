@@ -45,12 +45,15 @@ resource "google_compute_instance" "vm" {
     enable_confidential_compute = var.enable_confidential_vm
   }
 
-  # Sole tenancy
-  scheduling {
-    node_affinities {
-      key      = "compute.googleapis.com/node-group-name"
-      operator = "IN"
-      values   = var.sole_tenancy_node_groups
+  # Optional Sole Tenancy
+  dynamic "scheduling" {
+    for_each = var.enable_sole_tenancy ? [1] : []
+    content {
+      node_affinities {
+        key      = "compute.googleapis.com/node-group-name"
+        operator = "IN"
+        values   = [var.sole_tenancy_node_group]
+      }
     }
   }
 
