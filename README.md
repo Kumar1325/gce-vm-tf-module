@@ -43,6 +43,14 @@ This Terraform module creates Google Compute Engine (GCE) Virtual Machines (VMs)
 | `metadata`                         | Metadata key-value pairs to add to the instance              | `map(string)`    | `{}`                       | No           |
 | `cmek_key_name`                    | The name of the Customer-Managed Encryption Key (CMEK)       | `string`         | n/a                        | Yes          |
 
+### Variable Validation for Region
+The allowed GCP regions for GCE VM are:
+- US-CENTRAL1
+- US-EAST4
+- US-WEST3
+
+Attempting to use other regions will result in a validation error during `terraform plan` or `terraform apply`.
+
 ### Variable Validation for Confidential VMs
 
 If `enable_confidential_vm` is set to `true`, the `machine_type` must start with one of the following:
