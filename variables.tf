@@ -9,8 +9,13 @@ variable "credentials_file" {
 }
 
 variable "region" {
-  description = "Region where the instance will be deployed"
+  description = "Region where the instance will be deployed. Allowed values: US-CENTRAL1, US-EAST4, US-WEST3"
   type        = string
+
+  validation {
+    condition     = contains(["us-central1", "us-east4", "us-west3"], lower(var.region))
+    error_message = "Invalid region specified. Allowed values are: US-CENTRAL1, US-EAST4, US-WEST3 (case-insensitive)."
+  }
 }
 
 variable "zone" {
