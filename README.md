@@ -38,6 +38,7 @@ This Terraform module creates Google Compute Engine (GCE) Virtual Machines (VMs)
 | `enable_shielded_secure_boot`      | Enable secure boot for Shielded VM                           | `bool`           | `true`                     | No           |
 | `enable_shielded_vtpm`             | Enable vTPM for Shielded VM                                   | `bool`           | `true`                     | No           |
 | `enable_shielded_integrity_monitoring` | Enable integrity monitoring for Shielded VM                  | `bool`           | `true`                     | No           |
+| `enable_sole_tenacy`               | Enable Sole Tenancy for the instance                         | `bool`           | `false`                    | No           |
 | `sole_tenancy_node_groups`         | List of node group names for sole tenancy                    | `list(string)`   | `[]`                       | No           |
 | `tags`                             | List of network tags for the VM                              | `list(string)`   | `[]`                       | No           |
 | `metadata`                         | Metadata key-value pairs to add to the instance              | `map(string)`    | `{}`                       | No           |
