@@ -103,6 +103,12 @@ variable "enable_shielded_integrity_monitoring" {
   default     = true
 }
 
+variable "enable_sole_tenancy" {
+  description = "Enable Sole Tenancy for the instance"
+  type        = bool
+  default     = false
+}
+
 variable "sole_tenancy_node_groups" {
   description = "List of node group names for sole tenancy"
   type        = list(string)
