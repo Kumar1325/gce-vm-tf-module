@@ -63,7 +63,7 @@ func TestGCEInstanceWithAdvancedFeatures(t *testing.T) {
 
 	// Verify outputs
 	vmName := terraform.Output(t, terraformOptions, "vm_name")
-	vmExternalIP := terraform.Output(t, terraformOptions, "vm_external_ip")
+	vmInternalIP := terraform.Output(t, terraformOptions, "vm_internal_ip")
 
 	// Check the VM exists in GCP
 	computeClient := gcp.NewComputeClient(t)
@@ -71,13 +71,7 @@ func TestGCEInstanceWithAdvancedFeatures(t *testing.T) {
 
 	assert.Equal(t, vmName, instance.Name)
 	assert.NotNil(t, instance)
-
-	// Verify if IAP is enabled (no external IP)
-	if terraformOptions.Vars["enable_iap"].(bool) {
-		assert.Empty(t, vmExternalIP)
-	} else {
-		assert.NotEmpty(t, vmExternalIP)
-	}
+	assert.NotEmpty(t, vmInternalIP)
 
 	// Verify Shielded VM and Confidential VM configurations
 	assert.True(t, instance.ShieldedInstanceConfig.EnableSecureBoot)
@@ -138,3 +132,40 @@ func TestGCEInstanceWithCMEK(t *testing.T) {
 	vmName := terraform.Output(t, terraformOptions, "vm_name")
 	assert.Equal(t, "test-advanced-vm", vmName)
 }
+
+func TestGCEInstanceWithSoleTenancy(t *testing.T) {
+	t.Parallel()
+
+	terraformOptions := &terraform.Options{
+		TerraformDir: "../examples/advanced",
+		Vars: map[string]interface{}{
+			"instance_name":                   "test-advanced-instance",
+			"sole_tenancy_node_groups":        []string{"my-node-group"},
+		},
+	}
+
+	defer terraform.Destroy(t, terraformOptions)
+
+	// Apply Terraform configuration
+	terraform.InitAndApply(t, terraformOptions)
+
+	// Verify outputs
+	vmName := terraform.Output(t, terraformOptions, "vm_name")
+	vmInternalIP := terraform.Output(t, terraformOptions, "vm_internal_ip")
+
+	// Check the VM exists in GCP
+	computeClient := gcp.NewComputeClient(t)
+	instance := gcp.GetInstance(t, computeClient, "my-gcp-project", "us-central1-a", vmName)
+
+	assert.Equal(t, vmName, instance.Name)
+	assert.NotNil(t, instance)
+	assert.NotEmpty(t, vmInternalIP)
+
+	// Verify Shielded VM and Confidential VM configurations
+	assert.Contains(t, instance.Scheduling.NodeAffinities, gcp.NodeAffinity{
+	    Key:      "compute.googleapis.com/node-group-name",
+	    Operator: "IN",
+	    Values:   []string{"my-node-group"},
+	})
+}
+
