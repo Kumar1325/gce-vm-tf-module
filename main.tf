@@ -16,18 +16,6 @@ resource "google_compute_instance" "vm" {
   network_interface {
     network    = var.network
     subnetwork = var.subnetwork
-
-    access_config {
-      # This is required for external access
-      nat_ip = var.enable_iap ? null : google_compute_address.vm_static_ip.address
-    }
-  }
-
-  # Static IP if IAP is disabled
-  resource "google_compute_address" "vm_static_ip" {
-    name   = "${var.instance_name}-static-ip"
-    region = var.region
-    count  = var.enable_iap ? 0 : 1
   }
 
   # Add optional tags
@@ -57,6 +45,14 @@ resource "google_compute_instance" "vm" {
     }
   }
 
+  service_account {
+    # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.
+    email  = var.service_account_email
+    scopes = ["cloud-platform"]
+  }
   # Metadata or startup scripts
-  metadata = var.metadata
+  metadata = {
+    startup-script = "echo Hello, Terraform!"
+    block-project-ssh-keys = "true"
+  }
 }
